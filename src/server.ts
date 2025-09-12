@@ -19,6 +19,11 @@ import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
 import categoryRoutes from './routes/category.routes';
 import supplierRoutes from './routes/supplier.routes';
+import employeeRoutes from './routes/employee.routes';
+import attendanceRoutes from './routes/attendance.routes';
+import shiftRoutes from './routes/shift.routes';
+import commissionRoutes from './routes/commission.routes';
+import roleRoutes from './routes/role.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -137,6 +142,11 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/shifts', shiftRoutes);
+app.use('/api/commissions', commissionRoutes);
+app.use('/api/roles', roleRoutes);
 
 // Error handling middleware
 app.use(notFound);

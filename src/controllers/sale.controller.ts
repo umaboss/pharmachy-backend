@@ -201,6 +201,124 @@ export const getSale = async (req: Request, res: Response) => {
   }
 };
 
+export const getSaleByReceiptNumber = async (req: Request, res: Response) => {
+  try {
+    const { receiptNumber } = req.params;
+
+    console.log('Looking up receipt number:', receiptNumber);
+
+    // First, let's see what receipt numbers exist in the database
+    const allReceipts = await prisma.receipt.findMany({
+      select: {
+        receiptNumber: true,
+        saleId: true
+      },
+      take: 10
+    });
+    console.log('Available receipt numbers in database:', allReceipts);
+
+    const sale = await prisma.sale.findFirst({
+      where: {
+        receipts: {
+          some: {
+            receiptNumber: receiptNumber
+          }
+        }
+      },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+            address: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true
+          }
+        },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            address: true
+          }
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                unitType: true,
+                barcode: true
+              }
+            }
+          }
+        },
+        receipts: {
+          select: {
+            id: true,
+            receiptNumber: true,
+            printedAt: true
+          }
+        }
+      }
+    });
+
+    if (!sale) {
+      return res.status(404).json({
+        success: false,
+        message: `Sale not found for receipt number: ${receiptNumber}. Available receipts: ${allReceipts.map(r => r.receiptNumber).join(', ')}`
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: sale
+    });
+  } catch (error) {
+    console.error('Get sale by receipt number error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+export const getAvailableReceiptNumbers = async (req: Request, res: Response) => {
+  try {
+    const receipts = await prisma.receipt.findMany({
+      select: {
+        id: true,
+        receiptNumber: true,
+        saleId: true,
+        printedAt: true
+      },
+      orderBy: {
+        printedAt: 'desc'
+      },
+      take: 50
+    });
+
+    return res.json({
+      success: true,
+      data: { receipts }
+    });
+  } catch (error) {
+    console.error('Get available receipt numbers error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 export const createSale = async (req: Request, res: Response) => {
   try {
     console.log('Sale creation request body:', req.body);
